@@ -19,23 +19,60 @@ namespace GreekTextReader
             //var sentenceOutput = streaming(file);
 
 
+            var sentence = streaming(file, "1");
 
-
-            //for (int i = 0; i < sentenceOutput.Count; i++)
+            //foreach (var word in sentence)
             //{
-            //    Console.WriteLine($"Word: {sentenceOutput[i].sentenceWord}");
-            //    Console.WriteLine($"Parsing: {sentenceOutput[i].parseInfo}");
-            //    Console.WriteLine($" Sentence: { sentenceOutput[i].sentenceNumber}");
+            //    Console.Write(word.item);
             //}
-
-            //for (int i = 0; i < sentenceOutput.Count; i++)
-            //{
-            //}
+            
 
             Console.Read();
         }
 
-        static void streaming(string file) { }
+        static List<SentenceItem> streaming(string file, string sentenceNumber)
+        {
+            List<SentenceItem> fullSentence = new List<SentenceItem>();
+
+            using (XmlReader reader = XmlReader.Create(file))
+            {
+                while (reader.Read())
+                {
+
+                    if (reader.IsStartElement() && reader.Name == "s" && reader.GetAttribute("n") == sentenceNumber)
+                    {
+
+                        Console.WriteLine($"element name: {reader.Name}");
+                        Console.WriteLine($"Sentence Number is: {reader.GetAttribute("n")}");
+                        //Console.WriteLine(reader["n"]);
+
+                        reader.ReadToDescendant("t");
+                        Console.WriteLine($"element name: {reader.Name}");
+
+                        do
+                        {
+                            SentenceItem sentenceItem = new SentenceItem();
+                            sentenceItem.parseInfo = reader.GetAttribute("o");
+                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
+
+
+                            reader.ReadToDescendant("f");
+                            reader.Read();
+                            sentenceItem.item = reader.Value.Trim();
+                            Console.WriteLine($"Word is: {reader.Value}");
+                            reader.Read();
+                            reader.Read();
+
+                            Console.WriteLine($"element name: {reader.Name}");
+                            fullSentence.Add(sentenceItem);
+
+                        } while (reader.ReadToNextSibling("t"));
+
+                    }
+                }
+            }
+            return fullSentence;
+        }
     }
 }
 
