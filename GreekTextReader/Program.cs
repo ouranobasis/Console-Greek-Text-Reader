@@ -13,50 +13,66 @@ namespace GreekTextReader
         public static XmlNodeList word;
 
         static void Main(string[] args)
-        {
-            //C: \Users\jpruitt\Desktop\Code Projects\LemmatizedAncientGreekXML\ConsoleApp1\ConsoleApp1\texts\stoa0033a.tlg028.1st1K - grc1.xml
-
+        {   
             Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine("What text to read?");
+            var file = @"C:\Users\jpruitt\Desktop\Code Projects\LemmatizedAncientGreekXML\ConsoleApp1\ConsoleApp1\texts\stoa0033a.tlg028.1st1K-grc1.xml";
+            var sentenceOutput = streaming(file);
 
-            var file = Console.ReadLine();
-            word = ReadXML(file, 0);
 
-            printXML(word);
+
+
+            for (int i = 0; i < sentenceOutput.Count; i++)
+            {
+                Console.Write($" {sentenceOutput[2].sentenceWord}");
+            }
+
+            for (int i = 0; i < sentenceOutput.Count; i++)
+            {
+                Console.Write(sentenceOutput[i].parseInfo);
+            }
+
+            Console.Read();
         }
 
-        static void printXML(XmlNodeList word)
+
+        static List<Sentence> streaming(string file)
         {
-            ConsoleKey nextWord = Console.ReadKey().Key;
+            List<Sentence> fullSentence = new List<Sentence>();
 
-            while(true)
+            using (XmlReader reader = XmlReader.Create(file))
             {
-                while (word[wordNumber].InnerText != ".")
+                while (reader.Read() && reader.Value.Trim() != ".")
                 {
-                    if (Console.ReadKey().Key == ConsoleKey.Spacebar)
+                    Sentence currentSentence = new Sentence();
+                    if (reader.IsStartElement())
                     {
+                        switch (reader.Name)
+                        {
+                            case "s":
+                                currentSentence.sentenceNumber = Int32.Parse(reader["n"]);
+                                break;
+                            case "t":
+                                string parseInfo = reader["o"];
 
-                        Console.Write(word[wordNumber].InnerText);
-                        wordNumber = wordNumber + 1;
+                                if (parseInfo != null)
+                                {
+                                    Console.WriteLine("Parse Info: " + parseInfo);
+                                    currentSentence.parseInfo = reader["o"];
+                                }
+                                break;
+                            case "f":
+                                if (reader.Read())
+                                {
+                                    Console.WriteLine("  Text node: " + reader.Value.Trim());
+                                    currentSentence.sentenceWord = reader.Value.Trim();
+                                }
+                                break;
+                        }
                     }
-                }
-                Console.WriteLine("\n next sentence? Y/N");
-                if (Console.ReadKey().Key == ConsoleKey.Y)
-                {
-                    wordNumber = wordNumber + 1;
-                    Console.Write(word[wordNumber].InnerText);
+                    fullSentence.Add(currentSentence);
                 }
             }
-        }
-
-        static XmlNodeList ReadXML(string file, int next)
-        {
-
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(file);
-
-            XmlNodeList word = xmlDoc.GetElementsByTagName("f");
-            return word;
+            return fullSentence;
         }
     }
 }
