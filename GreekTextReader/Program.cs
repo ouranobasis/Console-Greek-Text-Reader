@@ -15,22 +15,14 @@ namespace GreekTextReader
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            var file = @"C:\Users\jpruitt\Desktop\Code Projects\LemmatizedAncientGreekXML\ConsoleApp1\ConsoleApp1\texts\stoa0033a.tlg028.1st1K-grc1.xml";
-            //var sentenceOutput = streaming(file);
+            var file = @"C:\Users\IWANOS\source\repos\Console-Greek-Text-Reader\GreekTextReader\texts\stoa0033a.tlg028.1st1K-grc1.xml";
 
-
-            var sentence = streaming(file, "1");
-
-            //foreach (var word in sentence)
-            //{
-            //    Console.Write(word.item);
-            //}
-            
+            var sentence = ReadSentence(file, "1");
 
             Console.Read();
         }
 
-        static List<SentenceItem> streaming(string file, string sentenceNumber)
+        static List<SentenceItem> ReadSentence(string file, string sentenceNumber)
         {
             List<SentenceItem> fullSentence = new List<SentenceItem>();
 
@@ -38,33 +30,24 @@ namespace GreekTextReader
             {
                 while (reader.Read())
                 {
-
                     if (reader.IsStartElement() && reader.Name == "s" && reader.GetAttribute("n") == sentenceNumber)
                     {
-
                         Console.WriteLine($"element name: {reader.Name}");
                         Console.WriteLine($"Sentence Number is: {reader.GetAttribute("n")}");
                         //Console.WriteLine(reader["n"]);
 
-                        reader.ReadToDescendant("t");
-                        Console.WriteLine($"element name: {reader.Name}");
+                        reader.ReadToDescendant("t");                       
 
                         do
                         {
+                            Console.WriteLine($"element name: {reader.Name}");
                             SentenceItem sentenceItem = new SentenceItem();
                             sentenceItem.parseInfo = reader.GetAttribute("o");
                             Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
 
+                            WordReader(reader.ReadSubtree());
 
-                            reader.ReadToDescendant("f");
-                            reader.Read();
-                            sentenceItem.item = reader.Value.Trim();
-                            Console.WriteLine($"Word is: {reader.Value}");
-                            reader.Read();
-                            reader.Read();
-
-                            Console.WriteLine($"element name: {reader.Name}");
-                            fullSentence.Add(sentenceItem);
+                            //fullSentence.Add(sentenceItem);
 
                         } while (reader.ReadToNextSibling("t"));
 
@@ -72,6 +55,26 @@ namespace GreekTextReader
                 }
             }
             return fullSentence;
+        }
+
+        static string WordReader(XmlReader wordReader)
+        {
+            string word = "";
+            while (wordReader.Read())
+            {
+                if (wordReader.IsStartElement())
+                {
+                    switch (wordReader.Name)
+                    {
+                        case "f":
+                            wordReader.Read();
+                            Console.WriteLine($"Word: {wordReader.Value.Trim()}");
+                            word = wordReader.Value.Trim();
+                            break;
+                    }
+                }
+            }
+            return word;
         }
     }
 }
