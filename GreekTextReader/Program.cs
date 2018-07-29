@@ -62,16 +62,11 @@ namespace GreekTextReader
             string word = "";
             while (wordReader.Read())
             {
-                if (wordReader.IsStartElement())
+                if (wordReader.IsStartElement() && wordReader.Name == "f")
                 {
-                    switch (wordReader.Name)
-                    {
-                        case "f":
-                            wordReader.Read();
-                            Console.WriteLine($"Word: {wordReader.Value.Trim()}");
-                            word = wordReader.Value.Trim();
-                            break;
-                    }
+                    wordReader.Read();
+                    Console.WriteLine($"Word: {wordReader.Value.Trim()}");
+                    word = wordReader.Value.Trim();
                 }
             }
             return word;
