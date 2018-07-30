@@ -18,7 +18,7 @@ namespace GreekTextReader
             Console.WriteLine("Which Secntence Would You Like To Read");
             var sentenceNumber = Console.ReadLine();
 
-            var file = @"C:\Users\IWANOS\source\repos\Console-Greek-Text-Reader\GreekTextReader\texts\stoa0033a.tlg028.1st1K-grc1.xml";
+            var file = $@"..\..\texts\stoa0033a.tlg028.1st1K-grc1.xml";
 
             var sentence = ReadSentence(file, sentenceNumber);
 
