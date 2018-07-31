@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +20,44 @@ namespace GreekTextReader
             Console.WriteLine("Which Secntence Would You Like To Read");
             var sentenceNumber = Console.ReadLine();
 
-            var file = $@"..\..\texts\stoa0033a.tlg028.1st1K-grc1.xml";
+            var assembly = Assembly.GetExecutingAssembly();
+            string resourceName = assembly.GetManifestResourceNames()[0];
+            Console.WriteLine(assembly.GetManifestResourceNames()[1]);
+            Console.Read();
+            var file = GetResourceTextFile(resourceName);
+
+            //var file = $@"texts\stoa0033a.tlg028.1st1K-grc1.xml";
+
 
             var sentence = ReadSentence(file, sentenceNumber);
 
+            string sentenceString = "";
             foreach (var word in sentence)
             {
-                Console.Write($"{word.item} ");                
+                sentenceString += $"{word.item} ";
+                Console.Write($"{word.item} ");
             }
-            Console.WriteLine("\n =======Type Word Number To Get Parsing Info======");
-            var wordNumber = Int32.Parse(Console.ReadLine());
-            Console.WriteLine($"\nReadable Code: {ParseInterpreter(sentence[wordNumber].parseInfo)}");
-            Console.WriteLine($"Word is: {sentence[wordNumber].item}");
-            Console.Read();
+
+            while (Console.ReadLine() != "exit")
+            {
+                Console.Clear();
+                Console.WriteLine("\n =======Type Word Number To Get Parsing Info======");
+                var wordNumber = Int32.Parse(Console.ReadLine());
+                Console.WriteLine(sentenceString);
+                Console.WriteLine($"\nReadable Code: {ParseInterpreter(sentence[wordNumber].parseInfo)}");
+                Console.WriteLine($"Word is: {sentence[wordNumber].item}");
+                Console.Read();
+            }
+            Environment.Exit(0);
+        }
+
+        public static Stream GetResourceTextFile(string filename)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var fileStream = assembly.GetManifestResourceStream(filename);
+            
+            return fileStream;
+            
         }
 
         static string ParseInterpreter(string parseInfo)
@@ -220,7 +247,7 @@ namespace GreekTextReader
             return interpretedCode;
         }
 
-        static List<SentenceItem> ReadSentence(string file, string sentenceNumber)
+        static List<SentenceItem> ReadSentence(Stream file, string sentenceNumber)
         {
             List<SentenceItem> fullSentence = new List<SentenceItem>();
 
@@ -230,7 +257,6 @@ namespace GreekTextReader
                 {
                     if (reader.IsStartElement() && reader.Name == "s" && reader.GetAttribute("n") == sentenceNumber)
                     {
-                        Console.WriteLine($"element name: {reader.Name}");
                         Console.WriteLine($"Sentence Number is: {reader.GetAttribute("n")}");
                         //Console.WriteLine(reader["n"]);
 
@@ -238,11 +264,10 @@ namespace GreekTextReader
 
                         do
                         {
-                            Console.WriteLine($"element name: {reader.Name}");
                             SentenceItem sentenceItem = new SentenceItem();
                             sentenceItem.parseInfo = reader.GetAttribute("o");
-                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
 
+                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
                             sentenceItem.item = WordReader(reader.ReadSubtree());
 
                             fullSentence.Add(sentenceItem);
@@ -272,77 +297,3 @@ namespace GreekTextReader
     }
 }
 
-//for (int i = 0; i<parseMatrixOne.Count(); i++)
-//            {
-//                if (parseMatrixOne[i] == part)
-//                {
-//                    Console.WriteLine()
-//                }
-//            }
-
-//            for (int i = 0; i<parseMatrixTwo.Count(); i++)
-//            {
-//                if (parseMatrixTwo[i] == part)
-//                {
-
-//                }
-//            }
-//            for (int i = 0; i<parseMatrixThree.Count(); i++)
-//            {
-//                if (parseMatrixThree[i] == part)
-//                {
-
-//                }
-//            }
-
-//            for (int i = 0; i<parseMatrixFour.Count(); i++)
-//            {
-//                if (parseMatrixFour[i] == part)
-//                {
-
-//                }
-//            }
-//            for (int i = 0; i<parseMatrixFive.Count(); i++)
-//            {
-//                if (parseMatrixFive[i] == part)
-//                {
-
-//                }
-//            }
-//            for (int i = 0; i<parseMatrixSix.Count(); i++)
-//            {
-//                if (parseMatrixSix[i] == part)
-//                {
-
-//                }
-//            }
-//            for (int i = 0; i<parseMatrixSeven.Count(); i++)
-//            {
-//                if (parseMatrixSeven[i] == part)
-//                {
-
-//                }
-//            }
-//            for (int i = 0; i<parseMatrixEight.Count(); i++)
-//            {
-//                if (parseMatrixEight[i] == part)
-//                {
-
-//                }
-//            }
-//            for (int i = 0; i<parseMatrixNine.Count(); i++)
-//            {
-//                if (parseMatrixNine[i] == part)
-//                {
-
-//                }
-//            }
-//char[] parseMatrixOne = new char[12] {'n', 'v', 'a', 'd', 'l', 'g', 'c', 'r', 'p', 'm', 'i', 'u' };
-//char[] parseMatrixThree = new char[3] { 's', 'p', 'd' };
-//char[] parseMatrixTwo = new char[3] { '1', '2', '3' };
-//char[] parseMatrixFour = new char[7] { 'p', 'i', 'r', 'l', 't', 'f', 'a' };
-//char[] parseMatrixFive = new char[6] { 'i', 's', 'o', 'n', 'm', 'p' };
-//char[] parseMatrixSix = new char[4] { 'a', 'p', 'm', 'e' };
-//char[] parseMatrixSeven = new char[3] { 'm', 'f', 'n' };
-//char[] parseMatrixEight = new char[6] { 'n', 'g', 'd', 'a', 'v', 'l' };
-//char[] parseMatrixNine = new char[2] { 'c', 's' };
