@@ -54,9 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Greek Text Reader.ico" />
-    <EmbeddedResource Include="A.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <Content Include="texts\output.txt" />
     <EmbeddedResource Include="texts\stoa0033a.tlg043.1st1K-grc1.xml" />
     <EmbeddedResource Include="texts\stoa0121.stoa001.opp-grc1.xml" />
@@ -969,9 +966,7 @@
     <None Include="texts\tlg9019.tlg001.opp-grc1.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="texts\stoa0033a.tlg028.1st1K-grc1.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="texts\stoa0033a.tlg028.1st1K-grc1.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

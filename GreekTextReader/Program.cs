@@ -17,19 +17,53 @@ namespace GreekTextReader
         {
             Console.OutputEncoding = Encoding.UTF8;
 
+            GetLibraryCollection();
+
             Console.WriteLine("Which Secntence Would You Like To Read");
+
+
+            var textName = 0;
             var sentenceNumber = Console.ReadLine();
+            var fullSentence = SentenceConstructor(textName, sentenceNumber);
+            var fullSentenceStr = SentenceWriter(textName, sentenceNumber);
+            
 
+
+            while (Console.ReadLine() != "exit")
+            {
+                Console.Clear();
+                Console.WriteLine(fullSentenceStr);
+                Console.WriteLine("\n =======Type Word Number To Get Parsing Info======");
+                var wordNumber = Int32.Parse(Console.ReadLine());
+
+                Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
+                Console.WriteLine($"Word is: {fullSentence[wordNumber].item}");
+                Console.Read();
+            }
+            Environment.Exit(0);
+        }
+
+        public static void GetLibraryCollection()
+        {            
             var assembly = Assembly.GetExecutingAssembly();
-            string resourceName = assembly.GetManifestResourceNames()[0];
-            Console.WriteLine(assembly.GetManifestResourceNames()[1]);
-            Console.Read();
-            var file = GetResourceTextFile(resourceName);
+            string[] resourceName = assembly.GetManifestResourceNames();
 
-            //var file = $@"texts\stoa0033a.tlg028.1st1K-grc1.xml";
+            foreach (var item in resourceName)
+            {
+                //Console.WriteLine(item);
+                var stream = assembly.GetManifestResourceStream(item);
 
+                using (XmlReader textName = XmlReader.Create(stream))
+                {                    
+                    if (textName.IsStartElement() && textName.Name == "text")
+                        Console.WriteLine(textName.GetAttribute("author") + " " + textName.GetAttribute("title"));
+                }
+            }
+        }
 
-            var sentence = ReadSentence(file, sentenceNumber);
+        public static string SentenceWriter(int textName, string sentenceNumber)
+        {
+            var sentence = SentenceConstructor(textName, sentenceNumber);
 
             string sentenceString = "";
             foreach (var word in sentence)
@@ -38,30 +72,57 @@ namespace GreekTextReader
                 Console.Write($"{word.item} ");
             }
 
-            while (Console.ReadLine() != "exit")
+            return sentenceString;
+        }            
+
+        static List<SentenceItem> SentenceConstructor(int textName, string sentenceNumber)
+        {
+            var file = GetResourceTextFile(textName);
+
+            List<SentenceItem> fullSentence = new List<SentenceItem>();
+
+            using (XmlReader reader = XmlReader.Create(file))
             {
-                Console.Clear();
-                Console.WriteLine("\n =======Type Word Number To Get Parsing Info======");
-                var wordNumber = Int32.Parse(Console.ReadLine());
-                Console.WriteLine(sentenceString);
-                Console.WriteLine($"\nReadable Code: {ParseInterpreter(sentence[wordNumber].parseInfo)}");
-                Console.WriteLine($"Word is: {sentence[wordNumber].item}");
-                Console.Read();
+                while (reader.Read())
+                {
+                    if (reader.IsStartElement() && reader.Name == "s" && reader.GetAttribute("n") == sentenceNumber)
+                    {
+                        Console.WriteLine($"Sentence Number is: {reader.GetAttribute("n")}");
+                        //Console.WriteLine(reader["n"]);
+
+                        reader.ReadToDescendant("t");                       
+
+                        do
+                        {
+                            SentenceItem sentenceItem = new SentenceItem();
+                            sentenceItem.parseInfo = reader.GetAttribute("o");
+
+                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
+                            sentenceItem.item = WordReader(reader.ReadSubtree());
+
+                            fullSentence.Add(sentenceItem);
+
+                        } while (reader.ReadToNextSibling("t"));
+
+                    }
+                }
             }
-            Environment.Exit(0);
+            return fullSentence;
         }
 
-        public static Stream GetResourceTextFile(string filename)
+        public static Stream GetResourceTextFile(int textName)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var fileStream = assembly.GetManifestResourceStream(filename);
+            string resourceName = assembly.GetManifestResourceNames()[textName];
+            var stream = assembly.GetManifestResourceStream(resourceName);
             
-            return fileStream;
-            
+            return stream;            
         }
 
-        static string ParseInterpreter(string parseInfo)
+        static string ParseInterpreter(List<SentenceItem> fullSentence, int wordNumber )
         {
+            var parseInfo = fullSentence[wordNumber].parseInfo;
+
             parseInfo.ToArray();
 
             string interpretedCode = "";
@@ -245,39 +306,6 @@ namespace GreekTextReader
 
             }
             return interpretedCode;
-        }
-
-        static List<SentenceItem> ReadSentence(Stream file, string sentenceNumber)
-        {
-            List<SentenceItem> fullSentence = new List<SentenceItem>();
-
-            using (XmlReader reader = XmlReader.Create(file))
-            {
-                while (reader.Read())
-                {
-                    if (reader.IsStartElement() && reader.Name == "s" && reader.GetAttribute("n") == sentenceNumber)
-                    {
-                        Console.WriteLine($"Sentence Number is: {reader.GetAttribute("n")}");
-                        //Console.WriteLine(reader["n"]);
-
-                        reader.ReadToDescendant("t");                       
-
-                        do
-                        {
-                            SentenceItem sentenceItem = new SentenceItem();
-                            sentenceItem.parseInfo = reader.GetAttribute("o");
-
-                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
-                            sentenceItem.item = WordReader(reader.ReadSubtree());
-
-                            fullSentence.Add(sentenceItem);
-
-                        } while (reader.ReadToNextSibling("t"));
-
-                    }
-                }
-            }
-            return fullSentence;
         }
 
         static string WordReader(XmlReader wordReader)
