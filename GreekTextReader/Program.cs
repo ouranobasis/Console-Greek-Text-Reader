@@ -22,6 +22,8 @@ namespace GreekTextReader
 
             var assembly = Assembly.GetExecutingAssembly();
             string resourceName = assembly.GetManifestResourceNames()[0];
+            Console.WriteLine(assembly.GetManifestResourceNames()[1]);
+            Console.Read();
             var file = GetResourceTextFile(resourceName);
 
             //var file = $@"texts\stoa0033a.tlg028.1st1K-grc1.xml";
