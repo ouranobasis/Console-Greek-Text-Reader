@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +20,43 @@ namespace GreekTextReader
             Console.WriteLine("Which Secntence Would You Like To Read");
             var sentenceNumber = Console.ReadLine();
 
-            var file = $@"..\..\texts\stoa0033a.tlg028.1st1K-grc1.xml";
+            var assembly = Assembly.GetExecutingAssembly();
+            string resourceName = assembly.GetManifestResourceNames()[0];
+            var file = GetResourceTextFile(resourceName);
+            Console.Read();
+
+            //var file = $@"texts\stoa0033a.tlg028.1st1K-grc1.xml";
 
             var sentence = ReadSentence(file, sentenceNumber);
 
+            string sentenceString = "";
             foreach (var word in sentence)
             {
-                Console.Write($"{word.item} ");                
+                sentenceString += $"{word.item} ";
+                Console.Write($"{word.item} ");
             }
-            Console.WriteLine("\n =======Type Word Number To Get Parsing Info======");
-            var wordNumber = Int32.Parse(Console.ReadLine());
-            Console.WriteLine($"\nReadable Code: {ParseInterpreter(sentence[wordNumber].parseInfo)}");
-            Console.WriteLine($"Word is: {sentence[wordNumber].item}");
-            Console.Read();
+
+            while (Console.ReadLine() != "exit")
+            {
+                Console.Clear();
+                Console.WriteLine("\n =======Type Word Number To Get Parsing Info======");
+                var wordNumber = Int32.Parse(Console.ReadLine());
+                Console.WriteLine(sentenceString);
+                Console.WriteLine($"\nReadable Code: {ParseInterpreter(sentence[wordNumber].parseInfo)}");
+                Console.WriteLine($"Word is: {sentence[wordNumber].item}");
+                Console.Read();
+            }
+            Environment.Exit(0);
+        }
+
+        public static FileStream GetResourceTextFile(string filename)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using (Stream stream = assembly.GetManifestResourceStream("filename"))
+            {
+                FileStream fileStream = stream as FileStream;
+                return fileStream;
+            }
         }
 
         static string ParseInterpreter(string parseInfo)
@@ -220,7 +246,7 @@ namespace GreekTextReader
             return interpretedCode;
         }
 
-        static List<SentenceItem> ReadSentence(string file, string sentenceNumber)
+        static List<SentenceItem> ReadSentence(FileStream file, string sentenceNumber)
         {
             List<SentenceItem> fullSentence = new List<SentenceItem>();
 
@@ -230,7 +256,6 @@ namespace GreekTextReader
                 {
                     if (reader.IsStartElement() && reader.Name == "s" && reader.GetAttribute("n") == sentenceNumber)
                     {
-                        Console.WriteLine($"element name: {reader.Name}");
                         Console.WriteLine($"Sentence Number is: {reader.GetAttribute("n")}");
                         //Console.WriteLine(reader["n"]);
 
@@ -238,11 +263,10 @@ namespace GreekTextReader
 
                         do
                         {
-                            Console.WriteLine($"element name: {reader.Name}");
                             SentenceItem sentenceItem = new SentenceItem();
                             sentenceItem.parseInfo = reader.GetAttribute("o");
-                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
 
+                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
                             sentenceItem.item = WordReader(reader.ReadSubtree());
 
                             fullSentence.Add(sentenceItem);
