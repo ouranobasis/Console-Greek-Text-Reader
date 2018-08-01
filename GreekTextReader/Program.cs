@@ -17,23 +17,25 @@ namespace GreekTextReader
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            GetLibraryCollection();
+            DisplayLibraryCollection();
+            Console.WriteLine("Which Text Would You Like To Read?");
+            var textName = ConvertNameToId(Console.ReadLine());
 
-            Console.WriteLine("Which Secntence Would You Like To Read");
-
-
-            var textName = 0;
+            Console.Clear();
+            DisplayBookDetails(textName);
+            Console.WriteLine("Which Secntence Would You Like To Read?");
             var sentenceNumber = Console.ReadLine();
+
             var fullSentence = SentenceConstructor(textName, sentenceNumber);
-            var fullSentenceStr = SentenceWriter(textName, sentenceNumber);
-            
+            var fullSentenceStr = SentenceWriter(textName, sentenceNumber);           
 
 
             while (Console.ReadLine() != "exit")
             {
                 Console.Clear();
+                DisplayBookDetails(textName);
                 Console.WriteLine(fullSentenceStr);
-                Console.WriteLine("\n =======Type Word Number To Get Parsing Info======");
+                Console.WriteLine("=======Type Word Number To Get Parsing Info======");
                 var wordNumber = Int32.Parse(Console.ReadLine());
 
                 Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
@@ -43,37 +45,14 @@ namespace GreekTextReader
             Environment.Exit(0);
         }
 
-        public static void GetLibraryCollection()
-        {            
-            var assembly = Assembly.GetExecutingAssembly();
-            string[] resourceName = assembly.GetManifestResourceNames();
-
-            foreach (var item in resourceName)
-            {
-                //Console.WriteLine(item);
-                var stream = assembly.GetManifestResourceStream(item);
-
-                using (XmlReader textName = XmlReader.Create(stream))
-                {                    
-                    if (textName.IsStartElement() && textName.Name == "text")
-                        Console.WriteLine(textName.GetAttribute("author") + " " + textName.GetAttribute("title"));
-                }
-            }
-        }
-
-        public static string SentenceWriter(int textName, string sentenceNumber)
+        public static Stream GetResourceTextFile(int textNumber)
         {
-            var sentence = SentenceConstructor(textName, sentenceNumber);
-
-            string sentenceString = "";
-            foreach (var word in sentence)
-            {
-                sentenceString += $"{word.item} ";
-                Console.Write($"{word.item} ");
-            }
-
-            return sentenceString;
-        }            
+            var assembly = Assembly.GetExecutingAssembly();
+            string resourceName = assembly.GetManifestResourceNames()[textNumber];
+            var stream = assembly.GetManifestResourceStream(resourceName);
+            
+            return stream;            
+        }
 
         static List<SentenceItem> SentenceConstructor(int textName, string sentenceNumber)
         {
@@ -87,19 +66,12 @@ namespace GreekTextReader
                 {
                     if (reader.IsStartElement() && reader.Name == "s" && reader.GetAttribute("n") == sentenceNumber)
                     {
-                        Console.WriteLine($"Sentence Number is: {reader.GetAttribute("n")}");
-                        //Console.WriteLine(reader["n"]);
-
-                        reader.ReadToDescendant("t");                       
-
+                        reader.ReadToDescendant("t");
                         do
                         {
                             SentenceItem sentenceItem = new SentenceItem();
                             sentenceItem.parseInfo = reader.GetAttribute("o");
-
-                            Console.WriteLine($"Attribute is: {reader.GetAttribute("o")}");
                             sentenceItem.item = WordReader(reader.ReadSubtree());
-
                             fullSentence.Add(sentenceItem);
 
                         } while (reader.ReadToNextSibling("t"));
@@ -110,13 +82,57 @@ namespace GreekTextReader
             return fullSentence;
         }
 
-        public static Stream GetResourceTextFile(int textName)
+        public static string SentenceWriter(int textName, string sentenceNumber)
         {
+            var sentence = SentenceConstructor(textName, sentenceNumber);
+
+            string sentenceString = "";
+            foreach (var word in sentence)
+            {
+                sentenceString += $"{word.item} ";
+            }
+            Console.WriteLine($"{sentenceString}");
+            return sentenceString;
+        }            
+
+        public static List<TextItem> GetLibraryCollection()
+        {            
             var assembly = Assembly.GetExecutingAssembly();
-            string resourceName = assembly.GetManifestResourceNames()[textName];
-            var stream = assembly.GetManifestResourceStream(resourceName);
-            
-            return stream;            
+            string[] resourceName = assembly.GetManifestResourceNames();
+            List<TextItem> libraryOfTexts = new List<TextItem>();
+            int increment = 0;
+
+            foreach (var item in resourceName)
+            {
+                TextItem text = new TextItem();
+                var stream = assembly.GetManifestResourceStream(item);
+
+                using (XmlReader textName = XmlReader.Create(stream))
+                {                    
+                    if (textName.IsStartElement() && textName.Name == "text")
+                    text.Author = (textName.GetAttribute("author") == "")? "Anonymous" : textName.GetAttribute("author");
+                    text.Title = (textName.GetAttribute("title") == "")? "Untitled" : textName.GetAttribute("title");
+                    text.Id = increment;
+                    text.FileName = item;
+                    increment++;
+                }
+                libraryOfTexts.Add(text);
+            }
+            return libraryOfTexts;
+        }
+
+        static string WordReader(XmlReader wordReader)
+        {
+            string word = "";
+            while (wordReader.Read())
+            {
+                if (wordReader.IsStartElement() && wordReader.Name == "f")
+                {
+                    wordReader.Read();
+                    word = wordReader.Value.Trim();
+                }
+            }
+            return word;
         }
 
         static string ParseInterpreter(List<SentenceItem> fullSentence, int wordNumber )
@@ -308,20 +324,52 @@ namespace GreekTextReader
             return interpretedCode;
         }
 
-        static string WordReader(XmlReader wordReader)
+        public static int ConvertNameToId(string text)
         {
-            string word = "";
-            while (wordReader.Read())
+            int bookId = 0;
+            int n;
+            bool isNumeric = int.TryParse(text, out n);
+
+            if (isNumeric == false)
             {
-                if (wordReader.IsStartElement() && wordReader.Name == "f")
+                var listOfTexts = GetLibraryCollection();
+                foreach (var book in listOfTexts)
                 {
-                    wordReader.Read();
-                    Console.WriteLine($"Word: {wordReader.Value.Trim()}");
-                    word = wordReader.Value.Trim();
+                    if(book.FileName == text)
+                    {
+                        bookId = book.Id;
+                    }
+                    Console.WriteLine("No books match your inquiry.");
                 }
             }
-            return word;
+            else if(isNumeric == true)
+            {
+                bookId = Int32.Parse(text);
+            }
+            return bookId;
         }
+
+        public static void DisplayLibraryCollection()
+        {             
+            foreach (var book in GetLibraryCollection())
+            {
+                Console.WriteLine($"{book.Id}. - {book.Author} {book.Title}");
+            }
+        }
+
+        public static string DisplayBookDetails(int textId)
+        {
+            string bookDetails = " ";
+            foreach (var book in GetLibraryCollection())
+            {
+                if (book.Id == textId)
+                {
+                    bookDetails = $"You are now reading {book.Title} By {book.Author}";
+                }
+            }
+            Console.WriteLine($"{bookDetails}\n");
+            return bookDetails;
+        }
+
     }
 }
-
