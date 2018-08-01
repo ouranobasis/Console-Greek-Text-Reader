@@ -48,12 +48,13 @@ namespace GreekTextReader
                 }
                 else 
                 {
-                    var wordNumber = Int32.Parse(sentenceRequest);
-                    Console.WriteLine(ParseInterpreter(fullSentence, wordNumber));
-                }
-
-                Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
-                Console.WriteLine($"Word is: {fullSentence[wordNumber].item}");
+                    fullSentenceStr = SentenceWriter(textName, sentenceNumber);
+                    fullSentence = SentenceConstructor(textName, sentenceRequest);
+                    Console.Clear();
+                    Console.WriteLine(fullSentenceStr);
+                    Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, sentenceNumber)}");
+                    Console.WriteLine($"Word is: {fullSentence[Int32.Parse(sentenceRequest)].item}");
+                }                
                 Console.Read();
             }
             Environment.Exit(0);
@@ -149,8 +150,9 @@ namespace GreekTextReader
             return word;
         }
 
-        static string ParseInterpreter(List<SentenceItem> fullSentence, int wordNumber )
+        static string ParseInterpreter(List<SentenceItem> fullSentence, string whichNumber )
         {
+            int wordNumber = Int32.Parse(whichNumber);
             var parseInfo = fullSentence[wordNumber].parseInfo;
 
             parseInfo.ToArray();
