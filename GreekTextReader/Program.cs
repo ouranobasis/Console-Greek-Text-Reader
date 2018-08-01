@@ -27,8 +27,8 @@ namespace GreekTextReader
             var sentenceNumber = Console.ReadLine();
 
             var fullSentence = SentenceConstructor(textName, sentenceNumber);
-            var fullSentenceStr = SentenceWriter(textName, sentenceNumber);           
-
+            var fullSentenceStr = SentenceWriter(textName, sentenceNumber);
+            Console.WriteLine(fullSentenceStr);
 
             while (Console.ReadLine() != "exit")
             {
@@ -36,7 +36,21 @@ namespace GreekTextReader
                 DisplayBookDetails(textName);
                 Console.WriteLine(fullSentenceStr);
                 Console.WriteLine("=======Type Word Number To Get Parsing Info======");
-                var wordNumber = Int32.Parse(Console.ReadLine());
+                string sentenceRequest = Console.ReadLine();
+                if (sentenceRequest == "S")
+                {
+                    Console.Clear();
+                    Console.WriteLine("Which Secntence Would You Like To Read?");
+                    sentenceNumber = Console.ReadLine();
+                    DisplayBookDetails(textName);
+                    fullSentenceStr = SentenceWriter(textName, sentenceNumber);
+                    Console.WriteLine(fullSentenceStr);
+                }
+                else 
+                {
+                    var wordNumber = Int32.Parse(sentenceRequest);
+                    Console.WriteLine(ParseInterpreter(fullSentence, wordNumber));
+                }
 
                 Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
                 Console.WriteLine($"Word is: {fullSentence[wordNumber].item}");
@@ -91,7 +105,7 @@ namespace GreekTextReader
             {
                 sentenceString += $"{word.item} ";
             }
-            Console.WriteLine($"{sentenceString}");
+            //Console.WriteLine($"{sentenceString}");
             return sentenceString;
         }            
 
