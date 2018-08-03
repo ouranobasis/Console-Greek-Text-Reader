@@ -36,25 +36,35 @@ namespace GreekTextReader
                 DisplayBookDetails(textName);
                 Console.WriteLine(fullSentenceStr);
                 Console.WriteLine("=======Type Word Number To Get Parsing Info======");
-                string sentenceRequest = Console.ReadLine();
-                if (sentenceRequest == "S")
+                string wordNumber = Console.ReadLine();
+                try
                 {
-                    Console.Clear();
-                    Console.WriteLine("Which Secntence Would You Like To Read?");
-                    sentenceNumber = Console.ReadLine();
-                    DisplayBookDetails(textName);
-                    fullSentenceStr = SentenceWriter(textName, sentenceNumber);
-                    Console.WriteLine(fullSentenceStr);
+                    if (wordNumber == "S")
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Which Secntence Would You Like To Read?");
+                        sentenceNumber = Console.ReadLine();
+                        Console.Clear();
+                        DisplayBookDetails(textName);
+                        fullSentence = SentenceConstructor(textName, sentenceNumber);
+                        fullSentenceStr = SentenceWriter(textName, sentenceNumber);
+                        Console.WriteLine(fullSentenceStr);
+                    }
+                    else
+                    {
+
+                        Console.Clear();
+                        Console.WriteLine(fullSentenceStr);
+                        Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
+                        Console.WriteLine($"Word is: {fullSentence[Int32.Parse(wordNumber)].item}");
+                    }
                 }
-                else 
+                catch (Exception)
                 {
-                    fullSentenceStr = SentenceWriter(textName, sentenceNumber);
-                    fullSentence = SentenceConstructor(textName, sentenceRequest);
-                    Console.Clear();
-                    Console.WriteLine(fullSentenceStr);
-                    Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, sentenceNumber)}");
-                    Console.WriteLine($"Word is: {fullSentence[Int32.Parse(sentenceRequest)].item}");
-                }                
+
+                    Console.WriteLine("incorrect input");
+                }
+                             
                 Console.Read();
             }
             Environment.Exit(0);
@@ -150,9 +160,10 @@ namespace GreekTextReader
             return word;
         }
 
-        static string ParseInterpreter(List<SentenceItem> fullSentence, string whichNumber )
+        static string ParseInterpreter(List<SentenceItem> fullSentence, string whichWord )
         {
-            int wordNumber = Int32.Parse(whichNumber);
+            int wordNumber = Int32.Parse(whichWord);
+
             var parseInfo = fullSentence[wordNumber].parseInfo;
 
             parseInfo.ToArray();
