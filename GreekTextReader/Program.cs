@@ -11,7 +11,11 @@ namespace GreekTextReader
 {
     class Program
     {
-        public static int wordNumber = 0;
+        public static int wordNumber;
+        public static int textName;
+        public static string sentenceNumber;
+        public static List<SentenceItem> fullSentence;
+        public static string fullSentenceStr;
 
         static void Main(string[] args)
         {
@@ -19,55 +23,64 @@ namespace GreekTextReader
 
             DisplayLibraryCollection();
             Console.WriteLine("Which Text Would You Like To Read?");
-            var textName = ConvertNameToId(Console.ReadLine());
+            textName = ConvertNameToId(Console.ReadLine());
 
             Console.Clear();
             DisplayBookDetails(textName);
             Console.WriteLine("Which Secntence Would You Like To Read?");
-            var sentenceNumber = Console.ReadLine();
+            sentenceNumber = Console.ReadLine();
 
-            var fullSentence = SentenceConstructor(textName, sentenceNumber);
-            var fullSentenceStr = SentenceWriter(textName, sentenceNumber);
+            fullSentence = SentenceConstructor(textName, sentenceNumber);
+            fullSentenceStr = SentenceWriter(textName, sentenceNumber);
             Console.WriteLine(fullSentenceStr);
 
-            while (Console.ReadLine() != "exit")
+            while (sentenceNumber != "exit")
             {
                 Console.Clear();
                 DisplayBookDetails(textName);
                 Console.WriteLine(fullSentenceStr);
                 Console.WriteLine("=======Type Word Number To Get Parsing Info======");
                 string wordNumber = Console.ReadLine();
-                try
-                {
-                    if (wordNumber == "S")
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Which Secntence Would You Like To Read?");
-                        sentenceNumber = Console.ReadLine();
-                        Console.Clear();
-                        DisplayBookDetails(textName);
-                        fullSentence = SentenceConstructor(textName, sentenceNumber);
-                        fullSentenceStr = SentenceWriter(textName, sentenceNumber);
-                        Console.WriteLine(fullSentenceStr);
-                    }
-                    else
-                    {
 
-                        Console.Clear();
-                        Console.WriteLine(fullSentenceStr);
-                        Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
-                        Console.WriteLine($"Word is: {fullSentence[Int32.Parse(wordNumber)].item}");
-                    }
-                }
-                catch (Exception)
-                {
-
-                    Console.WriteLine("incorrect input");
-                }
-                             
+                DisplayResults(wordNumber);
                 Console.Read();
             }
-            Environment.Exit(0);
+
+                Environment.Exit(0);
+        }
+
+        public static void DisplayResults(string userInput)
+        {
+            string wordNumber = userInput;
+            try
+            {
+                if (wordNumber == "S")
+                {
+                    Console.Clear();
+                    Console.WriteLine("Which Secntence Would You Like To Read?");
+                    sentenceNumber = Console.ReadLine();
+                    Console.Clear();
+                    DisplayBookDetails(textName);
+                    fullSentence = SentenceConstructor(textName, sentenceNumber);
+                    fullSentenceStr = SentenceWriter(textName, sentenceNumber);
+                    Console.WriteLine(fullSentenceStr);
+                    Console.ReadLine();
+                }
+                else
+                {
+
+                    Console.Clear();
+                    Console.WriteLine(fullSentenceStr);
+                    Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
+                    Console.WriteLine($"Word is: {fullSentence[Int32.Parse(wordNumber)].item}");
+                    Console.ReadLine();
+                }
+            }
+            catch (Exception)
+            {
+
+                Console.WriteLine("incorrect input");
+            }
         }
 
         public static Stream GetResourceTextFile(int textNumber)
