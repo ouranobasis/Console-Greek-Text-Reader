@@ -39,7 +39,7 @@ namespace GreekTextReader
                 Console.Clear();
                 DisplayBookDetails(textName);
                 Console.WriteLine(fullSentenceStr);
-                Console.WriteLine("=======Type Word Number To Get Parsing Info======");
+                Console.WriteLine("=======+Type Word Number To Get Parsing Info======+");
                 string wordNumber = Console.ReadLine();
 
                 DisplayResults(wordNumber);
