@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace GreekTextReader
 {
-    class Sentence
+    class SentenceItem
     {
-        public  int sentenceNumber { get; set; }
         public string parseInfo { get; set; }
-        public string sentenceWord { get; set; }
+        public string item { get; set; }
     }
 }
