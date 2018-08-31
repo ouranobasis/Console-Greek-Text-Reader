@@ -39,11 +39,10 @@ namespace GreekTextReader
                 Console.Clear();
                 DisplayBookDetails(textName);
                 Console.WriteLine(fullSentenceStr);
-                Console.WriteLine("=======+Type Word Number To Get Parsing Info======+");
+                Console.WriteLine("=======Type Word Number To Get Parsing Info or S to Select Sentence======");
                 string wordNumber = Console.ReadLine();
 
                 DisplayResults(wordNumber);
-                Console.Read();
             }
 
                 Environment.Exit(0);
@@ -71,8 +70,9 @@ namespace GreekTextReader
 
                     Console.Clear();
                     Console.WriteLine(fullSentenceStr);
-                    Console.WriteLine($"\nReadable Code: {ParseInterpreter(fullSentence, wordNumber)}");
-                    Console.WriteLine($"Word is: {fullSentence[Int32.Parse(wordNumber)].item}");
+                    Console.WriteLine($"\nWord is: {fullSentence[Int32.Parse(wordNumber)].item}");
+                    Console.WriteLine($"Parsing Info: {ParseInterpreter(fullSentence, wordNumber)}");
+                    Console.WriteLine("=======Press Enter To Select Next Word======");
                     Console.ReadLine();
                 }
             }
@@ -80,6 +80,7 @@ namespace GreekTextReader
             {
 
                 Console.WriteLine("incorrect input");
+                return;
             }
         }
 
@@ -132,6 +133,8 @@ namespace GreekTextReader
             //Console.WriteLine($"{sentenceString}");
             return sentenceString;
         }            
+
+
 
         public static List<TextItem> GetLibraryCollection()
         {            
