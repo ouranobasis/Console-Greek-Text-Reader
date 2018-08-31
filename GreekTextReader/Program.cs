@@ -11,7 +11,7 @@ namespace GreekTextReader
 {
     class Program
     {
-        public static int wordNumber;
+        public static int selectedWord;
         public static int textName;
         public static string sentenceNumber;
         public static List<SentenceItem> fullSentence;
@@ -32,7 +32,7 @@ namespace GreekTextReader
 
             fullSentence = SentenceConstructor(textName, sentenceNumber);
             fullSentenceStr = SentenceWriter(textName, sentenceNumber);
-            Console.WriteLine(fullSentenceStr);
+            //Console.WriteLine(fullSentenceStr);
 
             while (sentenceNumber != "exit")
             {
@@ -134,7 +134,12 @@ namespace GreekTextReader
             return sentenceString;
         }            
 
-
+        public static void HighlightCurrentWord(string selectedWord)
+        {
+            
+            selectedWord = selectedWord + 1;
+            //var fullSentence;
+        }
 
         public static List<TextItem> GetLibraryCollection()
         {            
